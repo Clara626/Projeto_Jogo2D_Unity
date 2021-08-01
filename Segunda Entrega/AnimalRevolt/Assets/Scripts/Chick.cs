@@ -1,52 +1,66 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Chick : MonoBehaviour{
 
-    public Rigidbody2D Rb;
-    public Rigidbody2D hook;
+	public Rigidbody2D Rb;
+	public Rigidbody2D hook;
 
-    public float releaseTime = .15f;
-    public float maxDragDistance = 3f;
+	public float releaseTime = .15f;
+	public float maxDragDistance = 2f;
 
-    private bool isPressed = false;
+	public GameObject nextBall;
 
-    void Update(){
+	private bool isPressed = false;
 
-        if (isPressed){
+	void Update()
+	{
+		if (isPressed)
+		{
+			Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			if (Vector3.Distance(mousePos, hook.position) > maxDragDistance)
+				Rb.position = hook.position + (mousePos - hook.position).normalized * maxDragDistance;
+			else
+				Rb.position = mousePos;
+		}
+	}
 
-            if (Vector3.Distance(mousePos, hook.position) > maxDragDistance)
-                Rb.position = hook.position + (mousePos - hook.position).normalized * maxDragDistance;
-            else
-                Rb.position = mousePos; 
+	void OnMouseDown()
+	{
+		isPressed = true;
+		Rb.isKinematic = true;
+	}
 
-        }
+	void OnMouseUp()
+	{
+		isPressed = false;
+		Rb.isKinematic = false;
 
-    }
+		StartCoroutine(Release());
+	}
 
-    void OnMouseDown(){
+	IEnumerator Release()
+	{
+		yield return new WaitForSeconds(releaseTime);
 
-        isPressed = true;
-        Rb.isKinematic = true;
-    }
+		GetComponent<SpringJoint2D>().enabled = false;
+		this.enabled = false;
 
-    void OnMouseUp(){
+		yield return new WaitForSeconds(2f);
 
-        isPressed = false;
-        Rb.isKinematic = false;
+		if (nextBall != null)
+		{
+			nextBall.SetActive(true);
+		}
+		else
+		{
+			Enemy.EnemiesAlive = 0;
+			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+		}
 
-        StartCoroutine(Release());
-    }
-
-    IEnumerator Release(){
-
-        yield return new WaitForSeconds(releaseTime);
-
-        GetComponent<SpringJoint2D>().enabled = false;
-        this.enabled = false;
-    }
+	}
 
 }

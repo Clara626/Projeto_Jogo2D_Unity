@@ -4,36 +4,33 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour{
 
-    public GameObject deathEffect;
+	public GameObject deathEffect;
 
-    public static int EnemiesAlive = 0; 
+	public float health = 4f;
 
-    public float health = 4f;
+	public static int EnemiesAlive = 0;
 
-    void Start(){
+	void Start()
+	{
+		EnemiesAlive++;
+	}
 
-        EnemiesAlive++;
-    }
+	void OnCollisionEnter2D(Collision2D colInfo)
+	{
+		if (colInfo.relativeVelocity.magnitude > health)
+		{
+			Die();
+		}
+	}
 
-    void OnCollisionEntar2D(Collision2D colInfo){
+	void Die()
+	{
+		Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        if (colInfo.relativeVelocity.magnitude > health){
+		EnemiesAlive--;
+		if (EnemiesAlive <= 0)
+			Debug.Log("LEVEL WON!");
 
-            Die();
-        }
-
-    }
-
-    void Die(){
-
-        Instantiate(deathEffect, transform.position, Quaternion.identity);
-
-        EnemiesAlive++;
-        if (EnemiesAlive <= 0)
-            Debug.Log("Level Won!")
-
-
-        Destroy(gameObject);
-
-    }
+		Destroy(gameObject);
+	}
 }
